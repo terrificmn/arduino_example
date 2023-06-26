@@ -1,0 +1,122 @@
+#define IN1 8
+#define IN2 9
+#define IN3 10
+#define IN4 11
+int steps = 0;
+bool direction = true;
+unsigned long last_time;
+unsigned long current_millis;
+int steps_left = 4095;
+long time;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+}
+
+void loop() {
+  while(steps_left > 0) {
+    current_millis = micros();
+    if(current_millis - last_time >= 1000) {
+      stepper(1);
+      time = time + micros() - last_time;
+      last_time = micros();
+      steps_left--;
+    }
+  }
+
+  // reset
+  delay(2000);
+  direction = !direction;
+  steps_left = 4095;
+}
+
+void stepper(int xw) {
+  for(int i=0; i < xw; i++) {
+    switch(steps) {
+      case 0:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, HIGH);
+      break;
+
+      case 1:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, HIGH);
+      break;
+
+      case 2:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+      break;
+
+      case 3:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+      break;
+
+      case 4:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+
+      break;
+
+      case 5:
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+      break;
+
+      case 6:
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+      break;
+
+      case 7:
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, HIGH);
+      break;
+
+      default:
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+      break;
+    }
+
+    setDirection();
+  }
+}
+
+void setDirection() {
+  if(direction == 1) {
+    steps++;
+  } else if(direction == 0) {
+    steps--;
+  }
+
+  if(steps > 7 ) {
+    steps = 0; // reset
+  }
+  if(steps < 0) {
+    steps = 7;
+  }
+}
